@@ -1,4 +1,4 @@
-<![CDATA[<div align="center">
+<div align="center">
 
 # 🚀 TeamBoost
 
@@ -26,7 +26,7 @@
 
 ---
 
-## � Technology Stack
+## ⚡ Technology Stack
 
 | Category | Technology |
 |----------|------------|
@@ -42,7 +42,7 @@
 
 ---
 
-## � Architecture Overview
+## 🏛️ Architecture Overview
 
 ```mermaid
 graph TB
@@ -190,7 +190,7 @@ mindmap
 
 ---
 
-## � Getting Started
+## 🛠 Getting Started
 
 ### Prerequisites
 
@@ -324,7 +324,7 @@ flowchart LR
 
 ---
 
-## 🧑‍💻 Developer Notes
+## 👨‍💻 Developer Notes
 
 ### Adding Mock Data
 
@@ -361,4 +361,3 @@ This project is private and proprietary.
 **Built with ❤️ by [Zain Ahmed](https://github.com/thezaynahmed)**
 
 </div>
-]]>
