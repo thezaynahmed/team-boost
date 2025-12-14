@@ -3,6 +3,7 @@ import { Inter, Patrick_Hand } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AppInsights } from "@/components/app-insights";
+import { FooterWrapper } from "@/components/layout/footer-wrapper";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 const patrickHand = Patrick_Hand({
@@ -34,6 +35,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <FooterWrapper />
         </ThemeProvider>
       </body>
     </html>
