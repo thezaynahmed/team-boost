@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🚀 TeamBoost
+# TeamBoost
 
 **A modern, collaborative team management platform designed to enhance productivity and team spirit.**
 
@@ -9,24 +9,24 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![Framer Motion](https://img.shields.io/badge/Framer_Motion-12-FF0055?style=for-the-badge&logo=framer)](https://www.framer.com/motion/)
 
-[Features](#-features) • [Tech Stack](#-technology-stack) • [Getting Started](#-getting-started) • [Documentation](#-documentation)
+[Features](#features) • [Tech Stack](#technology-stack) • [Getting Started](#getting-started) • [Deployment](#deployment)
 
 </div>
 
 ---
 
-## ✨ Features
+## Features
 
-- **🎯 Tactile Note System** — A digital corkboard with realistic sticky notes featuring paper textures, randomized rotation, and physical fasteners
-- **🔐 Enterprise SSO** — Secure authentication via Microsoft Entra ID (Azure AD)
-- **📊 Real-time Telemetry** — Performance monitoring with Azure Application Insights
-- **🌙 Dark/Light Mode** — Full theme support with smooth transitions
-- **🎨 Premium UI** — Glassmorphism, micro-animations, and modern design patterns
-- **📱 Fully Responsive** — Optimized for all screen sizes
+- **Tactile Note System** — A digital corkboard with realistic sticky notes featuring paper textures, randomized rotation, and physical fasteners
+- **Enterprise SSO** — Secure authentication via Microsoft Entra ID (Azure AD)
+- **Real-time Telemetry** — Performance monitoring with Azure Application Insights
+- **Dark/Light Mode** — Full theme support with smooth transitions
+- **Premium UI** — Glassmorphism, micro-animations, and modern design patterns
+- **Fully Responsive** — Optimized for all screen sizes
 
 ---
 
-## ⚡ Technology Stack
+## Technology Stack
 
 | Category | Technology |
 |----------|------------|
@@ -42,7 +42,7 @@
 
 ---
 
-## 🏛️ Architecture Overview
+## Architecture Overview
 
 ```mermaid
 graph TB
@@ -72,7 +72,7 @@ graph TB
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```mermaid
 graph LR
@@ -143,7 +143,7 @@ team-boost/
 
 ---
 
-## 🎨 Design System
+## Design System
 
 ### Tactile Design Philosophy
 
@@ -190,7 +190,7 @@ mindmap
 
 ---
 
-## 🛠 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -232,7 +232,7 @@ Open [http://localhost:3000](http://localhost:3000) to view the app.
 
 ---
 
-## 🔐 Authentication Setup
+## Authentication Setup
 
 ### Microsoft Entra ID Configuration
 
@@ -268,7 +268,7 @@ sequenceDiagram
 
 ---
 
-## 📊 Telemetry Setup
+## Telemetry Setup
 
 ### Azure Application Insights
 
@@ -283,37 +283,96 @@ sequenceDiagram
 
 ---
 
-## 🚢 Deployment
+## Deployment
 
-### Vercel (Recommended)
+### Azure Deployment Options
 
 ```mermaid
-flowchart LR
-    A[Push to GitHub] --> B[Vercel Import]
-    B --> C[Set Environment Variables]
-    C --> D[Update Azure Redirect URIs]
-    D --> E[Deploy]
+flowchart TB
+    A[Source Code] --> B{Choose Platform}
+    B --> C[Azure Container Apps]
+    B --> D[Azure App Service]
+    B --> E[Azure Static Web Apps]
     
-    style E fill:#00c853,color:#fff
+    C --> F[Container Registry]
+    F --> G[Deploy Container]
+    
+    D --> H[Node.js Runtime]
+    H --> I[Deploy via GitHub Actions]
+    
+    E --> J[Static Export]
+    J --> K[CDN Distribution]
+    
+    style C fill:#0078d4,color:#fff
+    style D fill:#0078d4,color:#fff
+    style E fill:#0078d4,color:#fff
 ```
 
-1. Push code to GitHub
-2. Import project into [Vercel](https://vercel.com)
-3. Add environment variables in project settings
-4. Update Azure App Registration redirect URI:
-   ```
-   https://<your-domain>.vercel.app/api/auth/callback/microsoft-entra-id
+### Option 1: Azure Container Apps (Recommended)
+
+1. **Build Docker Image**
+   ```bash
+   docker build -t teamboost:latest .
    ```
 
-### Azure Container Apps / App Service
+2. **Push to Azure Container Registry**
+   ```bash
+   az acr login --name <your-registry>
+   docker tag teamboost:latest <your-registry>.azurecr.io/teamboost:latest
+   docker push <your-registry>.azurecr.io/teamboost:latest
+   ```
 
-1. Build Docker image or configure Node.js runtime
-2. Inject environment variables
-3. Update redirect URIs in Azure App Registration
+3. **Deploy to Container Apps**
+   ```bash
+   az containerapp create \
+     --name teamboost \
+     --resource-group rg-teamboost \
+     --environment <your-environment> \
+     --image <your-registry>.azurecr.io/teamboost:latest \
+     --target-port 3000 \
+     --ingress external
+   ```
+
+4. **Configure Environment Variables**
+   - Add all `.env.local` variables in Azure Portal → Container App → Configuration
+
+5. **Update Redirect URI**
+   - Azure App Registration → Authentication → Add:
+   ```
+   https://<your-app>.azurecontainerapps.io/api/auth/callback/microsoft-entra-id
+   ```
+
+### Option 2: Azure App Service
+
+1. **Create App Service**
+   - Runtime: Node.js 18 LTS
+   - OS: Linux
+
+2. **Configure Deployment**
+   - Enable GitHub Actions deployment or use Azure CLI:
+   ```bash
+   az webapp up --name teamboost-app --resource-group rg-teamboost --runtime "NODE:18-lts"
+   ```
+
+3. **Set Environment Variables**
+   - Azure Portal → App Service → Configuration → Application settings
+
+4. **Update Redirect URI** in Azure App Registration
+
+### Option 3: Azure Static Web Apps
+
+> **Note:** Requires `next export` for static generation. Some features may not be compatible.
+
+1. **Create Static Web App** in Azure Portal
+2. **Connect to GitHub Repository**
+3. **Configure Build**:
+   - App location: `/`
+   - Output location: `out`
+   - Build command: `npm run build`
 
 ---
 
-## 📜 Available Scripts
+## Available Scripts
 
 | Command | Description |
 |---------|-------------|
@@ -324,7 +383,7 @@ flowchart LR
 
 ---
 
-## 👨‍💻 Developer Notes
+## Developer Notes
 
 ### Adding Mock Data
 
@@ -350,7 +409,7 @@ The app uses a custom purple text selection style matching the brand colors:
 
 ---
 
-## 📄 License
+## License
 
 This project is private and proprietary.
 
@@ -358,6 +417,6 @@ This project is private and proprietary.
 
 <div align="center">
 
-**Built with ❤️ by [Zain Ahmed](https://github.com/thezaynahmed)**
+**Built by [Zain Ahmed](https://github.com/thezaynahmed)**
 
 </div>
