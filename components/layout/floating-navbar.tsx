@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 const navLinks = [
     { name: "Features", href: "/#features" },
     { name: "Public Wall", href: "/public" },
-    { name: "Pricing", href: "/#pricing" },
+    { name: "Pricing", href: "/pricing" },
 ];
 
 export function FloatingNavbar() {
