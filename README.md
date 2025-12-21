@@ -145,6 +145,11 @@ team-boost/
 
 ## Design System
 
+### Database Architecture
+<p align="center">
+  <img src="diagrams/teamBoost_DatabaseArchitecture.png" alt="Database Schema" width="700">
+</p>
+
 ### Tactile Design Philosophy
 
 ```mermaid
