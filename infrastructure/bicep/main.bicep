@@ -25,8 +25,8 @@ param clientId string
 @description('App Service Plan SKU configuration')
 param appServicePlanSku object = {
   dev: {
-    name: 'B1'
-    tier: 'Basic'
+    name: 'F1'
+    tier: 'Free'
   }
   prod: {
     name: 'P1V3'
