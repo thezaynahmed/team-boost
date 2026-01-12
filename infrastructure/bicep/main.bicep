@@ -491,4 +491,4 @@ output cosmosDbAccountName string = cosmosDbAccount.name
 output keyVaultName string = keyVault.name
 
 @description('NextAuth URL for configuration')
-output nextAuthUrl string = customDomain != '' ? 'https://${customDomain}' : 'https://${webApp.properties.defaultHostName}'
+output nextAuthUrl string = customDomain != '' ? 'https://${customDomain}' : 'https://${webApp.properties.defaultHostName}' 
