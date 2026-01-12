@@ -1,16 +1,18 @@
 name: Deploy Team-Boost Infrastructure and Application
 
+# NOTE: Auto-deploy disabled until Azure quota is approved.
+# To re-enable, uncomment the push and pull_request triggers below.
 on:
-  push:
-    branches: [ main, dev ]
-    paths:
-      - 'infrastructure/**'
-      - '.github/workflows/deploy-infrastructure.yml'
-  pull_request:
-    branches: [ main, dev ]
-    paths:
-      - 'infrastructure/**'
-      - '.github/workflows/deploy-infrastructure.yml'
+  # push:
+  #   branches: [ main, dev ]
+  #   paths:
+  #     - 'infrastructure/**'
+  #     - '.github/workflows/deploy-infrastructure.yml'
+  # pull_request:
+  #   branches: [ main, dev ]
+  #   paths:
+  #     - 'infrastructure/**'
+  #     - '.github/workflows/deploy-infrastructure.yml'
   workflow_dispatch:
     inputs:
       environment:
