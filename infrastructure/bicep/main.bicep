@@ -60,6 +60,13 @@ var keyVaultName = '${baseName}-kv${resourceSuffix}'
 // NextAuth secret for session management
 var nextAuthSecret = 'TEAMBOOST_${toUpper(environment)}_${uniqueString(resourceGroup().id)}'
 
+// Common tags required by Azure Policy
+var commonTags = {
+  Environment: environment
+  Application: 'team-boost'
+  CostCenter: '000'
+}
+
 // =============================================================================
 // Log Analytics Workspace (required for Application Insights)
 // =============================================================================
@@ -76,11 +83,7 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09
       enableLogAccessUsingOnlyResourcePermissions: true
     }
   }
-  tags: {
-    Environment: environment
-    Application: 'team-boost'
-    Component: 'monitoring'
-  }
+  tags: union(commonTags, { Component: 'monitoring' })
 }
 
 // =============================================================================
@@ -100,11 +103,7 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
     // Disable sampling for better Next.js telemetry
     SamplingPercentage: environment == 'prod' ? 20 : 100
   }
-  tags: {
-    Environment: environment
-    Application: 'team-boost'
-    Component: 'telemetry'
-  }
+  tags: union(commonTags, { Component: 'telemetry' })
 }
 
 // =============================================================================
@@ -128,11 +127,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
       bypass: 'AzureServices'
     }
   }
-  tags: {
-    Environment: environment
-    Application: 'team-boost'
-    Component: 'security'
-  }
+  tags: union(commonTags, { Component: 'security' })
 }
 
 // =============================================================================
@@ -151,11 +146,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
     reserved: true // Required for Linux App Service Plans
     zoneRedundant: environment == 'prod' ? true : false
   }
-  tags: {
-    Environment: environment
-    Application: 'team-boost'
-    Component: 'compute'
-  }
+  tags: union(commonTags, { Component: 'compute' })
 }
 
 // =============================================================================
@@ -194,11 +185,7 @@ resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = {
     // Enable analytical store for team insights
     enableAnalyticalStorage: environment == 'prod' ? true : false
   }
-  tags: {
-    Environment: environment
-    Application: 'team-boost'
-    Component: 'database'
-  }
+  tags: union(commonTags, { Component: 'database' })
 }
 
 // =============================================================================
@@ -396,11 +383,7 @@ resource webApp 'Microsoft.Web/sites@2023-12-01' = {
   identity: {
     type: 'SystemAssigned'
   }
-  tags: {
-    Environment: environment
-    Application: 'team-boost'
-    Component: 'web-application'
-  }
+  tags: union(commonTags, { Component: 'web-application' })
 }
 
 // =============================================================================
