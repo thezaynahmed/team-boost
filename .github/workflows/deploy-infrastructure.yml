@@ -40,11 +40,6 @@ jobs:
     - name: Checkout Team-Boost code
       uses: actions/checkout@v4
 
-    - name: Setup Azure CLI
-      uses: azure/CLI@v1
-      with:
-        version: latest
-
     - name: Azure Login
       uses: azure/login@v1
       with:
@@ -85,11 +80,6 @@ jobs:
       with:
         node-version: '20'
         cache: 'npm'
-
-    - name: Setup Azure CLI
-      uses: azure/CLI@v1
-      with:
-        version: latest
 
     - name: Azure Login
       uses: azure/login@v1
@@ -229,11 +219,6 @@ jobs:
         node-version: '20'
         cache: 'npm'
 
-    - name: Setup Azure CLI
-      uses: azure/CLI@v1
-      with:
-        version: latest
-
     - name: Azure Login
       uses: azure/login@v1
       with:
@@ -370,11 +355,6 @@ jobs:
       with:
         node-version: '20'
         cache: 'npm'
-
-    - name: Setup Azure CLI
-      uses: azure/CLI@v1
-      with:
-        version: latest
 
     - name: Azure Login
       uses: azure/login@v1
