@@ -72,6 +72,14 @@ graph TB
 
 ---
 
+## Database Architecture
+
+<p align="center">
+  <img src="diagrams/teamBoost_DatabaseArchitecture.png" alt="Database Schema" width="700">
+</p>
+
+---
+
 ## Project Structure
 
 ```mermaid
@@ -100,55 +108,109 @@ graph LR
 
 ```
 team-boost/
-├── app/                          # Next.js App Router
-│   ├── api/                      # API routes
-│   ├── dashboard/                # Protected dashboard pages
-│   │   └── notes/                # Notes management
-│   ├── login/                    # Authentication page
-│   ├── public/                   # Public wall page
-│   ├── globals.css               # Global styles & design tokens
-│   ├── layout.tsx                # Root layout
-│   ├── not-found.tsx             # Custom 404 page
-│   └── page.tsx                  # Landing page
+├── app/                              # Next.js App Router
+│   ├── api/
+│   │   └── auth/                     # NextAuth.js API routes
+│   │       └── [...nextauth]/        # Auth handlers
+│   ├── dashboard/                    # Protected dashboard pages
+│   │   ├── notes/                    # Notes management
+│   │   ├── settings/                 # User settings
+│   │   ├── team/                     # Team management
+│   │   ├── layout.tsx                # Dashboard layout with sidebar
+│   │   └── page.tsx                  # Dashboard home
+│   ├── login/                        # Authentication page
+│   │   └── page.tsx                  # Microsoft SSO login
+│   ├── pricing/                      # Pricing page
+│   │   └── page.tsx
+│   ├── public/                       # Public wall page
+│   │   └── page.tsx
+│   ├── globals.css                   # Global styles & design tokens
+│   ├── layout.tsx                    # Root layout
+│   ├── not-found.tsx                 # Custom 404 page
+│   └── page.tsx                      # Landing page
 │
 ├── components/
-│   ├── landing/                  # Marketing page sections
-│   │   ├── HeroSection.tsx       # Hero with 3D visuals
-│   │   ├── StorySection.tsx      # Feature showcase
-│   │   ├── FinalCTASection.tsx   # Call-to-action
-│   │   ├── PublicPreviewSection.tsx
-│   │   └── Marquee.tsx           # Infinite scroll ticker
+│   ├── dashboard/                    # Dashboard-specific components
+│   │   ├── note-card.tsx             # Dashboard note card
+│   │   ├── recent-activity.tsx       # Activity feed
+│   │   └── stats-cards.tsx           # Statistics overview
 │   │
-│   ├── layout/                   # Layout components
-│   │   ├── floating-navbar.tsx   # Glassmorphic navigation
-│   │   ├── site-footer.tsx       # Footer component
-│   │   └── footer-wrapper.tsx
+│   ├── landing/                      # Marketing page sections
+│   │   ├── FinalCTASection.tsx       # Call-to-action section
+│   │   ├── HeroSection.tsx           # Hero with 3D visuals
+│   │   ├── Marquee.tsx               # Infinite scroll ticker
+│   │   ├── PublicPreviewSection.tsx  # Public wall preview
+│   │   └── StorySection.tsx          # Feature showcase
 │   │
-│   ├── ui/                       # Reusable UI components
-│   │   ├── TactileNoteCard.tsx   # Sticky note component
-│   │   ├── MagneticButton.tsx    # Interactive button
-│   │   ├── BackgroundGrid.tsx    # Grid pattern overlay
-│   │   ├── MeshBackground.tsx    # Gradient mesh
-│   │   ├── border-beam.tsx       # Animated border effect
-│   │   └── ...                   # Shadcn/UI components
+│   ├── layout/                       # Layout components
+│   │   ├── floating-navbar.tsx       # Glassmorphic navigation
+│   │   ├── footer-wrapper.tsx        # Footer context wrapper
+│   │   └── site-footer.tsx           # Main footer component
 │   │
-│   └── dashboard/                # Dashboard-specific components
+│   ├── marketing/                    # Marketing components
+│   │   ├── site-footer.tsx           # Marketing footer
+│   │   └── site-header.tsx           # Marketing header
+│   │
+│   ├── notes/                        # Note-related components
+│   │
+│   ├── public/                       # Public-facing components
+│   │
+│   ├── sections/                     # Reusable page sections
+│   │
+│   ├── ui/                           # Reusable UI components
+│   │   ├── BackgroundGrid.tsx        # Grid pattern overlay
+│   │   ├── HeroVisual.tsx            # 3D hero visual
+│   │   ├── MagneticButton.tsx        # Interactive button
+│   │   ├── MeshBackground.tsx        # Gradient mesh
+│   │   ├── SmoothScroll.tsx          # Lenis scroll wrapper
+│   │   ├── TactileNoteCard.tsx       # Sticky note component
+│   │   ├── border-beam.tsx           # Animated border effect
+│   │   └── ...                       # Shadcn/UI components
+│   │                                 # (avatar, badge, button, card,
+│   │                                 #  dropdown-menu, input, separator,
+│   │                                 #  sheet, sidebar, skeleton, table,
+│   │                                 #  tooltip, breadcrumb)
+│   │
+│   ├── app-insights.tsx              # Azure App Insights wrapper
+│   ├── app-sidebar.tsx               # Dashboard sidebar
+│   ├── mode-toggle.tsx               # Dark/Light mode toggle
+│   ├── nav-main.tsx                  # Main navigation
+│   ├── nav-projects.tsx              # Projects navigation
+│   ├── nav-user.tsx                  # User menu navigation
+│   ├── team-switcher.tsx             # Team switcher component
+│   └── theme-provider.tsx            # Theme context provider
 │
-├── lib/                          # Utilities & helpers
-│   └── mock-data.ts              # Development mock data
+├── lib/                              # Utilities & helpers
+│   ├── auth.ts                       # NextAuth.js configuration
+│   ├── mock-data.ts                  # Development mock data
+│   └── utils.ts                      # Utility functions (cn, etc.)
 │
-├── hooks/                        # Custom React hooks
-└── public/                       # Static assets
+├── hooks/                            # Custom React hooks
+│   └── use-mobile.ts                 # Mobile detection hook
+│
+├── infrastructure/                   # Azure deployment resources
+│   ├── bicep/                        # Azure Bicep templates
+│   ├── scripts/                      # Deployment scripts
+│   └── README.md                     # Infrastructure documentation
+│
+├── diagrams/                         # Architecture diagrams
+│
+├── public/                           # Static assets
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── next.svg
+│   ├── vercel.svg
+│   └── window.svg
+│
+├── middleware.ts                     # Next.js middleware (auth)
+├── next.config.ts                    # Next.js configuration
+├── tailwind.config.ts                # Tailwind CSS configuration
+└── tsconfig.json                     # TypeScript configuration
 ```
 
 ---
 
 ## Design System
-
-### Database Architecture
-<p align="center">
-  <img src="diagrams/teamBoost_DatabaseArchitecture.png" alt="Database Schema" width="700">
-</p>
 
 ### Tactile Design Philosophy
 
