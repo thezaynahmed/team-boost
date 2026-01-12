@@ -52,7 +52,7 @@ var appServicePlanName = '${baseName}-plan${resourceSuffix}'
 var webAppName = '${baseName}-app${resourceSuffix}'
 var cosmosAccountName = '${baseName}-cosmos${resourceSuffix}'
 var cosmosDatabaseName = 'teamboost'
-var cosmosContainerName = 'teams'
+var cosmosContainerName = 'team-items'
 var appInsightsName = '${baseName}-insights${resourceSuffix}'
 var logAnalyticsName = '${baseName}-logs${resourceSuffix}'
 var keyVaultName = '${baseName}-kv${resourceSuffix}'
@@ -212,10 +212,10 @@ resource cosmosDatabase 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2024
 // Teams container
 resource cosmosTeamsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2024-05-15' = {
   parent: cosmosDatabase
-  name: 'teams'
+  name: cosmosContainerName
   properties: {
     resource: {
-      id: 'teams'
+      id: cosmosContainerName
       partitionKey: {
         paths: ['/teamId']
         kind: 'Hash'
