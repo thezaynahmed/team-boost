@@ -39,3 +39,46 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Production build and deployment
+deployment/
+*.zip
+teamboost-app.zip
+team-boost-deployment.zip
+
+# Azure Infrastructure artifacts
+*.bicepparam
+deployment-outputs.json
+infrastructure/bicep/*.parameters.local.json
+
+# Azure CLI
+.azure/
+
+# ARM Template deployment files
+azuredeploy.parameters.json
+*.parameters.local.json
+.deployment/
+
+# IDEs
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+
+# Optional: Other IaC tools (if mixing)
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+
+# Pulumi
+Pulumi.*.yaml
+.pulumi/

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environment": {
+      "value": "prod"
+    },
+    "baseName": {
+      "value": "teamboost"
+    },
+    "location": {
+      "value": "East US"
+    },
+    "tenantId": {
+      "value": "YOUR_TENANT_ID_HERE"
+    },
+    "clientId": {
+      "value": "YOUR_CLIENT_ID_HERE"
+    },
+    "appServicePlanSku": {
+      "value": {
+        "dev": {
+          "name": "B1",
+          "tier": "Basic"
+        },
+        "prod": {
+          "name": "P1V3",
+          "tier": "PremiumV3"
+        }
+      }
+    },
+    "cosmosDbThroughput": {
+      "value": {
+        "dev": 400,
+        "prod": 2000
+      }
+    },
+    "customDomain": {
+      "value": "teamboost.yourdomain.com"
+    }
+  }
+}
