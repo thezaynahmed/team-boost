@@ -226,7 +226,7 @@ resource cosmosTeamsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabase
           { path: '/*' }
         ]
         excludedPaths: [
-          { path: '/members/*/avatar/?' }
+          { path: '/"_etag"/?' }
         ]
       }
       defaultTtl: -1 // No auto-expiry
