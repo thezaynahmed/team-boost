@@ -101,6 +101,13 @@ jobs:
       id: deploy-infra
       run: |
         cd infrastructure/bicep
+        
+        echo "=== DEBUG: FILE CONTENT ==="
+        ls -la
+        grep "cosmosContainerName" main.bicep
+        grep "excludedPaths" main.bicep -A 5
+        echo "==========================="
+
         DEPLOYMENT_NAME="teamboost-dev-deployment-$(date +%Y%m%d-%H%M%S)"
 
         az deployment group create \
