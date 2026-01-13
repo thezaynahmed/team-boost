@@ -9,7 +9,7 @@ interface SmoothScrollProps {
 function SmoothScroll({ children }: SmoothScrollProps) {
     return (
         <ReactLenis root options={{ lerp: 0.1, duration: 1.5 }}>
-            {children}
+            {children as any}
         </ReactLenis>
     );
 }
