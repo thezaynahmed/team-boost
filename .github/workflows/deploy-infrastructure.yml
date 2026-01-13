@@ -172,7 +172,7 @@ jobs:
 
         # Copy public assets and config
         [[ -d "public" ]] && cp -r public deployment/
-        [[ -f "next.config.ts" ]] && cp next.config.ts deployment/
+        [[ -f "next.config.js" ]] && cp next.config.js deployment/
 
         # Create startup script
         cat > deployment/startup.sh << 'EOF'
@@ -310,7 +310,7 @@ jobs:
 
         # Copy public assets and config
         [[ -d "public" ]] && cp -r public deployment/
-        [[ -f "next.config.ts" ]] && cp next.config.ts deployment/
+        [[ -f "next.config.js" ]] && cp next.config.js deployment/
 
         # Create startup script
         cat > deployment/startup.sh << 'EOF'
@@ -457,7 +457,7 @@ jobs:
           cp package*.json deployment/
         fi
         [[ -d "public" ]] && cp -r public deployment/
-        [[ -f "next.config.ts" ]] && cp next.config.ts deployment/
+        [[ -f "next.config.js" ]] && cp next.config.js deployment/
         
         # Startup script
         cat > deployment/startup.sh << 'EOF'
