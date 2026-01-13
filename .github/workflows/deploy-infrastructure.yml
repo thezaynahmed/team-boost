@@ -147,7 +147,7 @@ jobs:
 
     - name: Build and Deploy Team-Boost Application
       env:
-        NODE_ENV: development
+        NODE_ENV: production
         ENVIRONMENT: dev
       run: |
         # Install dependencies
@@ -441,7 +441,7 @@ jobs:
 
     - name: Build and Deploy Application
       env:
-        NODE_ENV: ${{ github.event.inputs.environment }}
+        NODE_ENV: production
         ENVIRONMENT: ${{ env.ENV_SHORT }}
       run: |
         npm ci --legacy-peer-deps
