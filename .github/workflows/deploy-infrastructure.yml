@@ -151,7 +151,7 @@ jobs:
         ENVIRONMENT: dev
       run: |
         # Install dependencies
-        npm ci
+        npm ci --legacy-peer-deps
 
         # Build the Team-Boost application
         npm run build
@@ -289,7 +289,7 @@ jobs:
         ENVIRONMENT: prod
       run: |
         # Install dependencies
-        npm ci
+        npm ci --legacy-peer-deps
 
         # Build the Team-Boost application
         npm run build
@@ -444,7 +444,7 @@ jobs:
         NODE_ENV: ${{ github.event.inputs.environment }}
         ENVIRONMENT: ${{ env.ENV_SHORT }}
       run: |
-        npm ci
+        npm ci --legacy-peer-deps
         npm run build
         
         # Deployment package logic
