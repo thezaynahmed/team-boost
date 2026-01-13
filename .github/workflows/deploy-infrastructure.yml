@@ -353,7 +353,7 @@ jobs:
     name: Manual Environment Deploy
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch'
-    environment: ${{ github.event.inputs.environment }}
+    environment: ${{ github.event.inputs.environment == 'dev' && 'development' || 'production' }}
 
     steps:
     - name: Checkout Team-Boost code
