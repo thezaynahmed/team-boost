@@ -1,4 +1,4 @@
-name: Deploy Team-Boost Infrastructure and Application
+name: Deploy FIX
 
 # NOTE: Auto-deploy disabled until Azure quota is approved.
 # To re-enable, uncomment the push and pull_request triggers below.
