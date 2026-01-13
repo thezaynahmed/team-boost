@@ -304,12 +304,20 @@ resource webApp 'Microsoft.Web/sites@2023-12-01' = {
       webSocketsEnabled: true // For real-time collaboration features
       nodeVersion: '20-lts'
       // Custom startup command for Next.js 16 with App Router
-      appCommandLine: 'npm run start'
+      appCommandLine: 'node server.js'
       appSettings: [
         // Next.js configuration
         {
           name: 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'
           value: 'false'
+        }
+        {
+          name: 'PORT'
+          value: '8080'
+        }
+        {
+          name: 'WEBSITES_PORT'
+          value: '8080'
         }
         {
           name: 'WEBSITE_NODE_DEFAULT_VERSION'
