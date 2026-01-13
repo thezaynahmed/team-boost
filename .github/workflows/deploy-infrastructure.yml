@@ -384,6 +384,8 @@ jobs:
 
     - name: Deploy Team-Boost
       run: |
+        chmod +x ./infrastructure/scripts/deploy-infrastructure.sh
+        chmod +x ./infrastructure/scripts/deploy-app.sh
         ./infrastructure/scripts/deploy-infrastructure.sh ${{ env.ENV_SHORT }} ${{ env.RESOURCE_GROUP }}
 
         # Get the app name from deployment

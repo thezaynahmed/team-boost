@@ -125,7 +125,7 @@ create_resource_group() {
 validate_bicep() {
     log_info "Validating Bicep template for Team-Boost..."
 
-    cd infrastructure/bicep
+    cd infrastructure/bicep_v2
 
     az deployment group validate \
         --resource-group "$RESOURCE_GROUP" \
@@ -141,7 +141,7 @@ validate_bicep() {
 deploy_infrastructure() {
     log_team_boost "Deploying Team-Boost infrastructure for environment: $ENVIRONMENT"
 
-    cd infrastructure/bicep
+    cd infrastructure/bicep_v2
 
     DEPLOYMENT_NAME="${BASE_NAME}-deployment-$(date +%Y%m%d-%H%M%S)"
 
