@@ -18,11 +18,11 @@ on:
       environment:
         description: 'Environment to deploy'
         required: true
-        default: 'dev'
+        default: 'development'
         type: choice
         options:
-          - dev
-          - prod
+          - development
+          - production
 
 permissions:
   id-token: write
@@ -353,7 +353,7 @@ jobs:
     name: Manual Environment Deploy
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch'
-    environment: ${{ github.event.inputs.environment == 'dev' && 'development' || 'production' }}
+    environment: ${{ github.event.inputs.environment }}
 
     steps:
     - name: Checkout Team-Boost code
@@ -374,19 +374,21 @@ jobs:
 
     - name: Set Environment Variables
       run: |
-        if [[ "${{ github.event.inputs.environment }}" == "prod" ]]; then
+        if [[ "${{ github.event.inputs.environment }}" == "production" ]]; then
           echo "RESOURCE_GROUP=${{ env.AZURE_RESOURCE_GROUP_PROD }}" >> $GITHUB_ENV
+          echo "ENV_SHORT=prod" >> $GITHUB_ENV
         else
           echo "RESOURCE_GROUP=${{ env.AZURE_RESOURCE_GROUP_DEV }}" >> $GITHUB_ENV
+          echo "ENV_SHORT=dev" >> $GITHUB_ENV
         fi
 
     - name: Deploy Team-Boost
       run: |
-        ./infrastructure/scripts/deploy-infrastructure.sh ${{ github.event.inputs.environment }} ${{ env.RESOURCE_GROUP }}
+        ./infrastructure/scripts/deploy-infrastructure.sh ${{ env.ENV_SHORT }} ${{ env.RESOURCE_GROUP }}
 
         # Get the app name from deployment
         APP_NAME=$(az webapp list --resource-group ${{ env.RESOURCE_GROUP }} --query "[0].name" -o tsv)
 
         if [[ -n "$APP_NAME" ]]; then
-          ./infrastructure/scripts/deploy-app.sh ${{ github.event.inputs.environment }} ${{ env.RESOURCE_GROUP }} $APP_NAME
+          ./infrastructure/scripts/deploy-app.sh ${{ env.ENV_SHORT }} ${{ env.RESOURCE_GROUP }} $APP_NAME
         fi
