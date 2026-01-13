@@ -145,14 +145,15 @@ jobs:
           --name entra-client-secret \
           --value "${{ secrets.TEAMBOOST_CLIENT_SECRET }}"
 
+    - name: Install Dependencies
+      run: |
+        npm ci --legacy-peer-deps
+
     - name: Build and Deploy Team-Boost Application
       env:
         NODE_ENV: production
         ENVIRONMENT: dev
       run: |
-        # Install dependencies
-        npm ci --legacy-peer-deps
-
         # Build the Team-Boost application
         npm run build
 
@@ -283,14 +284,15 @@ jobs:
           --name entra-client-secret \
           --value "${{ secrets.TEAMBOOST_CLIENT_SECRET }}"
 
+    - name: Install Dependencies
+      run: |
+        npm ci --legacy-peer-deps
+
     - name: Build and Deploy Team-Boost Application
       env:
         NODE_ENV: production
         ENVIRONMENT: prod
       run: |
-        # Install dependencies
-        npm ci --legacy-peer-deps
-
         # Build the Team-Boost application
         npm run build
 
@@ -439,12 +441,15 @@ jobs:
           --name entra-client-secret \
           --value "${{ secrets.TEAMBOOST_CLIENT_SECRET }}"
 
+    - name: Install Dependencies
+      run: |
+        npm ci --legacy-peer-deps
+
     - name: Build and Deploy Application
       env:
         NODE_ENV: production
         ENVIRONMENT: ${{ env.ENV_SHORT }}
       run: |
-        npm ci --legacy-peer-deps
         npm run build
         
         # Deployment package logic
