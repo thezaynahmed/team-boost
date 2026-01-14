@@ -163,7 +163,7 @@ jobs:
         # Copy Next.js build output
         if [[ -d ".next/standalone" ]]; then
           # Standalone build (preferred for App Service)
-          cp -r .next/standalone/* deployment/
+          cp -r .next/standalone/. deployment/
           mkdir -p deployment/.next/static && cp -r .next/static/* deployment/.next/static/
         else
           # Standard build fallback
@@ -307,7 +307,7 @@ jobs:
         # Copy Next.js build output
         if [[ -d ".next/standalone" ]]; then
           # Standalone build (preferred for App Service)
-          cp -r .next/standalone/* deployment/
+          cp -r .next/standalone/. deployment/
           mkdir -p deployment/.next/static && cp -r .next/static/* deployment/.next/static/
         else
           # Standard build fallback
@@ -465,7 +465,7 @@ jobs:
         # Deployment package logic
         mkdir -p deployment
         if [[ -d ".next/standalone" ]]; then
-          cp -r .next/standalone/* deployment/
+          cp -r .next/standalone/. deployment/
           mkdir -p deployment/.next/static && cp -r .next/static/* deployment/.next/static/
         else
           cp -r .next deployment/
