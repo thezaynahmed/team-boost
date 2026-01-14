@@ -325,13 +325,17 @@ resource webApp 'Microsoft.Web/sites@2023-12-01' = {
         }
         {
           name: 'NODE_ENV'
-          value: environment == 'prod' ? 'production' : 'development'
+          value: 'production'
         }
         {
           name: 'NEXT_TELEMETRY_DISABLED'
           value: '1'
         }
         // NextAuth.js configuration
+        {
+          name: 'AUTH_TRUST_HOST'
+          value: 'true'
+        }
         {
           name: 'NEXTAUTH_URL'
           value: customDomain != '' ? 'https://${customDomain}' : 'https://${webAppName}.azurewebsites.net'
