@@ -51,7 +51,7 @@ jobs:
 
     - name: Validate Dev Template
       run: |
-        cd infrastructure/bicep_v2
+        cd infrastructure/bicep
         az deployment group validate \
           --resource-group ${{ env.AZURE_RESOURCE_GROUP_DEV }} \
           --template-file main.bicep \
@@ -60,7 +60,7 @@ jobs:
     - name: Validate Prod Template
       if: github.ref == 'refs/heads/main'
       run: |
-        cd infrastructure/bicep_v2
+        cd infrastructure/bicep
         az deployment group validate \
           --resource-group ${{ env.AZURE_RESOURCE_GROUP_PROD }} \
           --template-file main.bicep \
@@ -100,7 +100,7 @@ jobs:
     - name: Deploy Infrastructure
       id: deploy-infra
       run: |
-        cd infrastructure/bicep_v2
+        cd infrastructure/bicep
         
         echo "=== DEBUG: FILE CONTENT ==="
         ls -la
@@ -251,7 +251,7 @@ jobs:
     - name: Deploy Infrastructure
       id: deploy-infra
       run: |
-        cd infrastructure/bicep_v2
+        cd infrastructure/bicep
         DEPLOYMENT_NAME="teamboost-prod-deployment-$(date +%Y%m%d-%H%M%S)"
 
         az deployment group create \
@@ -397,7 +397,7 @@ jobs:
     - name: Deploy Infrastructure
       id: deploy-infra
       run: |
-        cd infrastructure/bicep_v2
+        cd infrastructure/bicep
         DEPLOYMENT_NAME="teamboost-${{ env.ENV_SHORT }}-deployment-$(date +%Y%m%d-%H%M%S)"
 
         az deployment group create \

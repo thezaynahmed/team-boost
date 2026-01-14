@@ -24,8 +24,8 @@
           "tier": "Basic"
         },
         "prod": {
-          "name": "P1V3",
-          "tier": "PremiumV3"
+          "name": "B1",
+          "tier": "Basic"
         }
       }
     },
