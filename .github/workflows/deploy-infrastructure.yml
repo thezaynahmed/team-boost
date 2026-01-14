@@ -164,7 +164,7 @@ jobs:
         if [[ -d ".next/standalone" ]]; then
           # Standalone build (preferred for App Service)
           cp -r .next/standalone/* deployment/
-          cp -r .next/static deployment/.next/static
+          mkdir -p deployment/.next/static && cp -r .next/static/* deployment/.next/static/
         else
           # Standard build fallback
           cp -r .next deployment/
@@ -308,7 +308,7 @@ jobs:
         if [[ -d ".next/standalone" ]]; then
           # Standalone build (preferred for App Service)
           cp -r .next/standalone/* deployment/
-          cp -r .next/static deployment/.next/static
+          mkdir -p deployment/.next/static && cp -r .next/static/* deployment/.next/static/
         else
           # Standard build fallback
           cp -r .next deployment/
@@ -466,7 +466,7 @@ jobs:
         mkdir -p deployment
         if [[ -d ".next/standalone" ]]; then
           cp -r .next/standalone/* deployment/
-          cp -r .next/static deployment/.next/static
+          mkdir -p deployment/.next/static && cp -r .next/static/* deployment/.next/static/
         else
           cp -r .next deployment/
           cp package*.json deployment/
