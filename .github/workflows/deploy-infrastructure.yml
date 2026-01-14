@@ -193,6 +193,11 @@ jobs:
         zip -r ../teamboost-app.zip . > /dev/null
         cd ..
 
+        # Start the webapp in case it was stopped
+        az webapp start \
+          --resource-group ${{ env.AZURE_RESOURCE_GROUP_DEV }} \
+          --name ${{ steps.deploy-infra.outputs.web-app-name }} || true
+
         # Deploy to App Service
         az webapp deployment source config-zip \
           --resource-group ${{ env.AZURE_RESOURCE_GROUP_DEV }} \
@@ -331,6 +336,11 @@ jobs:
         cd deployment
         zip -r ../teamboost-app.zip . > /dev/null
         cd ..
+
+        # Start the webapp in case it was stopped
+        az webapp start \
+          --resource-group ${{ env.AZURE_RESOURCE_GROUP_PROD }} \
+          --name ${{ steps.deploy-infra.outputs.web-app-name }} || true
 
         # Deploy to App Service
         az webapp deployment source config-zip \
@@ -481,6 +491,11 @@ jobs:
         cd deployment
         zip -r ../teamboost-app.zip . > /dev/null
         cd ..
+        
+        # Start the webapp in case it was stopped
+        az webapp start \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --name ${{ steps.deploy-infra.outputs.web-app-name }} || true
         
         az webapp deployment source config-zip \
           --resource-group ${{ env.RESOURCE_GROUP }} \
