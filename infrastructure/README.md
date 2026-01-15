@@ -288,6 +288,16 @@ traces
    - Verify firewall settings
    - Check access keys in Key Vault
 
+4. **Quota exceeded errors (SubscriptionIsOverQuotaForSku)**
+   - Your subscription has limited App Service Plan slots per tier
+   - Solution: Use a shared App Service Plan (already configured)
+   - If you deleted resource groups, wait 5-10 minutes for quota to refresh
+
+5. **"Resource state is not Online" errors**
+   - After deleting resources, Azure needs 5-10 minutes to fully release names
+   - Wait and re-run the deployment
+   - For Cosmos DB: names are globally unique and reserved during deletion
+
 4. **Deployment failures**
    - Ensure resource names are globally unique
    - Check Azure subscription limits
