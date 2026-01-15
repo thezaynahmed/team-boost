@@ -33,8 +33,7 @@ permissions:
   contents: read
 
 env:
-  AZURE_RESOURCE_GROUP_DEV: teamboost-rg-dev
-  AZURE_RESOURCE_GROUP_PROD: teamboost-rg-prod
+  AZURE_RESOURCE_GROUP: teamboost-rg  # Shared resource group for all environments
   AZURE_LOCATION: East US
 
 jobs:
@@ -86,7 +85,7 @@ jobs:
     - name: Create Resource Group
       run: |
         az group create \
-          --name ${{ env.AZURE_RESOURCE_GROUP_DEV }} \
+          --name ${{ env.AZURE_RESOURCE_GROUP }} \
           --location "${{ env.AZURE_LOCATION }}" \
           --tags Environment=dev Application=team-boost ManagedBy=GitHub-Actions
 
@@ -105,7 +104,7 @@ jobs:
         DEPLOYMENT_NAME="teamboost-dev-deployment-$(date +%Y%m%d-%H%M%S)"
 
         az deployment group create \
-          --resource-group ${{ env.AZURE_RESOURCE_GROUP_DEV }} \
+          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
           --template-file main.bicep \
           --parameters @parameters.dev.json \
           --parameters tenantId=${{ secrets.AZURE_TENANT_ID }} \
@@ -114,17 +113,17 @@ jobs:
 
         # Get outputs
         WEB_APP_URL=$(az deployment group show \
-          --resource-group ${{ env.AZURE_RESOURCE_GROUP_DEV }} \
+          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
           --name $DEPLOYMENT_NAME \
           --query "properties.outputs.webAppUrl.value" -o tsv)
 
         WEB_APP_NAME=$(az deployment group show \
-          --resource-group ${{ env.AZURE_RESOURCE_GROUP_DEV }} \
+          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
           --name $DEPLOYMENT_NAME \
           --query "properties.outputs.webAppName.value" -o tsv)
 
         KEY_VAULT_NAME=$(az deployment group show \
-          --resource-group ${{ env.AZURE_RESOURCE_GROUP_DEV }} \
+          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
           --name $DEPLOYMENT_NAME \
           --query "properties.outputs.keyVaultName.value" -o tsv)
 
@@ -190,12 +189,12 @@ jobs:
 
         # Start the webapp in case it was stopped
         az webapp start \
-          --resource-group ${{ env.AZURE_RESOURCE_GROUP_DEV }} \
+          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
           --name ${{ steps.deploy-infra.outputs.web-app-name }} || true
 
         # Deploy to App Service
         az webapp deployment source config-zip \
-          --resource-group ${{ env.AZURE_RESOURCE_GROUP_DEV }} \
+          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
           --name ${{ steps.deploy-infra.outputs.web-app-name }} \
           --src teamboost-app.zip
 
@@ -239,7 +238,7 @@ jobs:
     - name: Create Resource Group
       run: |
         az group create \
-          --name ${{ env.AZURE_RESOURCE_GROUP_PROD }} \
+          --name ${{ env.AZURE_RESOURCE_GROUP }} \
           --location "${{ env.AZURE_LOCATION }}" \
           --tags Environment=prod Application=team-boost ManagedBy=GitHub-Actions
 
@@ -250,7 +249,7 @@ jobs:
         DEPLOYMENT_NAME="teamboost-prod-deployment-$(date +%Y%m%d-%H%M%S)"
 
         az deployment group create \
-          --resource-group ${{ env.AZURE_RESOURCE_GROUP_PROD }} \
+          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
           --template-file main.bicep \
           --parameters @parameters.prod.json \
           --parameters tenantId=${{ secrets.AZURE_TENANT_ID }} \
@@ -259,17 +258,17 @@ jobs:
 
         # Get outputs
         WEB_APP_URL=$(az deployment group show \
-          --resource-group ${{ env.AZURE_RESOURCE_GROUP_PROD }} \
+          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
           --name $DEPLOYMENT_NAME \
           --query "properties.outputs.webAppUrl.value" -o tsv)
 
         WEB_APP_NAME=$(az deployment group show \
-          --resource-group ${{ env.AZURE_RESOURCE_GROUP_PROD }} \
+          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
           --name $DEPLOYMENT_NAME \
           --query "properties.outputs.webAppName.value" -o tsv)
 
         KEY_VAULT_NAME=$(az deployment group show \
-          --resource-group ${{ env.AZURE_RESOURCE_GROUP_PROD }} \
+          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
           --name $DEPLOYMENT_NAME \
           --query "properties.outputs.keyVaultName.value" -o tsv)
 
@@ -335,12 +334,12 @@ jobs:
 
         # Start the webapp in case it was stopped
         az webapp start \
-          --resource-group ${{ env.AZURE_RESOURCE_GROUP_PROD }} \
+          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
           --name ${{ steps.deploy-infra.outputs.web-app-name }} || true
 
         # Deploy to App Service
         az webapp deployment source config-zip \
-          --resource-group ${{ env.AZURE_RESOURCE_GROUP_PROD }} \
+          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
           --name ${{ steps.deploy-infra.outputs.web-app-name }} \
           --src teamboost-app.zip
 
@@ -383,10 +382,10 @@ jobs:
     - name: Set Environment Variables
       run: |
         if [[ "${{ github.event.inputs.environment }}" == "production" ]]; then
-          echo "RESOURCE_GROUP=${{ env.AZURE_RESOURCE_GROUP_PROD }}" >> $GITHUB_ENV
+          echo "RESOURCE_GROUP=${{ env.AZURE_RESOURCE_GROUP }}" >> $GITHUB_ENV
           echo "ENV_SHORT=prod" >> $GITHUB_ENV
         else
-          echo "RESOURCE_GROUP=${{ env.AZURE_RESOURCE_GROUP_DEV }}" >> $GITHUB_ENV
+          echo "RESOURCE_GROUP=${{ env.AZURE_RESOURCE_GROUP }}" >> $GITHUB_ENV
           echo "ENV_SHORT=dev" >> $GITHUB_ENV
         fi
 

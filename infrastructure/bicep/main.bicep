@@ -48,7 +48,7 @@ param customDomain string = ''
 // =============================================================================
 
 var resourceSuffix = '-${environment}'
-var appServicePlanName = '${baseName}-plan${resourceSuffix}'
+var appServicePlanName = '${baseName}-plan' // Shared plan for all environments
 var webAppName = '${baseName}-app${resourceSuffix}'
 var cosmosAccountName = '${baseName}-cosmos${resourceSuffix}'
 var cosmosDatabaseName = 'teamboost'
