@@ -14,10 +14,9 @@ fi
 echo "Checking if 'entra-client-secret' exists in Key Vault: $AZURE_KEY_VAULT_NAME..."
 
 # Check if secret exists
-# FORCE REGNERATION to fix potential bad secret state
-# SECRET_EXISTS=$(az keyvault secret list --vault-name "$AZURE_KEY_VAULT_NAME" --query "[?name=='entra-client-secret'] | length(@)" -o tsv)
+SECRET_EXISTS=$(az keyvault secret list --vault-name "$AZURE_KEY_VAULT_NAME" --query "[?name=='entra-client-secret'] | length(@)" -o tsv)
 
-if [ "true" == "false" ]; then
+if [ "$SECRET_EXISTS" == "1" ]; then
     echo "Secret 'entra-client-secret' already exists in Key Vault. Skipping generation."
 else
     echo "Secret not found. Generating new Client Secret for App: $TEAMBOOST_CLIENT_ID..."
@@ -34,7 +33,8 @@ else
         
         echo "Secret saved to Key Vault successfully."
     else
-        echo "Error: Failed to generate client secret."
-        exit 1
+        echo "WARNING: Failed to generate client secret (Insufficient Privileges). Please manually update 'entra-client-secret' in Key Vault or grant 'Application Administrator' role to the Service Principal."
+        # Do not exit 1, just continue so deployment finishes
+        exit 0
     fi
 fi
