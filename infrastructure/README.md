@@ -83,21 +83,50 @@ Update your app registration with the deployed URLs:
 - **Redirect URI**: `https://teamboost-app-dev.azurewebsites.net/api/auth/callback/microsoft-entra-id`
 - **Logout URL**: `https://teamboost-app-dev.azurewebsites.net`
 
+## 🏗️ Architecture
+
+Team-Boost uses a **shared resource group architecture** to maximize resource efficiency:
+
+```
+teamboost-rg (Shared Resource Group)
+├── teamboost-plan (S1 Standard - Shared App Service Plan)
+├── teamboost-app-dev (Development Web App)
+├── teamboost-app-prod (Production Web App)
+├── teamboost-cosmos-dev (Dev Cosmos DB)
+├── teamboost-cosmos-prod (Prod Cosmos DB)
+├── teamboost-kv-dev (Dev Key Vault)
+├── teamboost-kv-prod (Prod Key Vault)
+└── teamboost-insights-* (Application Insights)
+```
+
+**Benefits:**
+- Single App Service Plan = 1 quota slot used
+- Both environments share compute resources
+- Cost-effective for startups/MVPs
+- Easy to manage
+
 ## 🔧 Environment Configuration
+
+### Shared App Service Plan
+
+- **SKU**: S1 (Standard)
+- **Tier**: Standard
+- **Features**: Always On, Custom Domains, SSL, Staging Slots
+- **Hosts**: Both Dev and Prod apps
 
 ### Development Environment
 
-- **App Service Plan**: B1 (Basic)
+- **Web App**: `teamboost-app-dev`
 - **Cosmos DB**: 400 RU/s
-- **Features**: Debug logging, detailed errors, no zone redundancy
-- **Cost**: ~$15-25/month
+- **Key Vault**: `teamboost-kv-dev`
+- **Features**: Debug logging, detailed errors
 
 ### Production Environment
 
-- **App Service Plan**: P1V3 (Premium)
+- **Web App**: `teamboost-app-prod`
 - **Cosmos DB**: 2000 RU/s
-- **Features**: Zone redundancy, automatic failover, enhanced backup
-- **Cost**: ~$75-100/month
+- **Key Vault**: `teamboost-kv-prod`
+- **Features**: Production optimizations
 
 ## 📊 Cosmos DB Schema
 
