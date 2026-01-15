@@ -13,8 +13,12 @@ fi
 
 echo "Checking if 'entra-client-secret' exists in Key Vault: $AZURE_KEY_VAULT_NAME..."
 
-# Check if secret exists
-SECRET_EXISTS=$(az keyvault secret list --vault-name "$AZURE_KEY_VAULT_NAME" --query "[?name=='entra-client-secret'] | length(@)" -o tsv)
+# Check if secret exists (with error handling for RBAC propagation delay)
+SECRET_EXISTS=$(az keyvault secret list --vault-name "$AZURE_KEY_VAULT_NAME" --query "[?name=='entra-client-secret'] | length(@)" -o tsv 2>&1) || {
+    echo "WARNING: Cannot access Key Vault yet (RBAC permissions may still be propagating)."
+    echo "Please manually add 'entra-client-secret' to Key Vault: $AZURE_KEY_VAULT_NAME"
+    exit 0  # Don't fail the deployment
+}
 
 if [ "$SECRET_EXISTS" == "1" ]; then
     echo "Secret 'entra-client-secret' already exists in Key Vault. Skipping generation."

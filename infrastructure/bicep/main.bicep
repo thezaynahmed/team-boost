@@ -144,7 +144,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
   kind: 'linux'
   properties: {
     reserved: true // Required for Linux App Service Plans
-    zoneRedundant: environment == 'prod' ? true : false
+    zoneRedundant: false // S1 (Standard) tier doesn't support zone redundancy
   }
   tags: union(commonTags, { Component: 'compute' })
 }
@@ -165,7 +165,7 @@ resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = {
       {
         locationName: location
         failoverPriority: 0
-        isZoneRedundant: environment == 'prod' ? true : false
+        isZoneRedundant: false // Disabled due to regional capacity constraints
       }
     ]
     databaseAccountOfferType: 'Standard'
