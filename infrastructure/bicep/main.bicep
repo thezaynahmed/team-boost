@@ -58,7 +58,7 @@ var logAnalyticsName = '${baseName}-logs${resourceSuffix}'
 var keyVaultName = '${baseName}-kv${resourceSuffix}'
 
 // NextAuth secret for session management
-var nextAuthSecret = 'TEAMBOOST_${toUpper(environment)}_${uniqueString(resourceGroup().id)}'
+var nextAuthSecret = guid(resourceGroup().id, environment, 'nextauth-secret')
 
 // Common tags required by Azure Policy
 var commonTags = {
