@@ -446,7 +446,6 @@ resource customDomainBinding 'Microsoft.Web/sites/hostNameBindings@2023-12-01' =
     siteName: webApp.name
     hostNameType: 'Verified'
     sslState: 'SniEnabled'
-    certificateThumbprint: null
   }
 }
 
