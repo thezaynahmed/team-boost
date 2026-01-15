@@ -346,6 +346,10 @@ resource webApp 'Microsoft.Web/sites@2023-12-01' = {
         }
         // Microsoft Entra ID configuration
         {
+          name: 'AUTH_SECRET'
+          value: nextAuthSecret
+        }
+        {
           name: 'AUTH_MICROSOFT_ENTRA_ID_ID'
           value: clientId
         }
