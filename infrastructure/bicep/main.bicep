@@ -183,7 +183,7 @@ resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = {
       }
     }
     // Enable analytical store for team insights
-    enableAnalyticalStorage: environment == 'prod' ? true : false
+    enableAnalyticalStorage: false // Not available on all subscription types
   }
   tags: union(commonTags, { Component: 'database' })
 }
@@ -294,7 +294,7 @@ resource webApp 'Microsoft.Web/sites@2023-12-01' = {
   properties: {
     serverFarmId: appServicePlan.id
     httpsOnly: true
-    redundancyMode: environment == 'prod' ? 'Manual' : 'None'
+    redundancyMode: 'None' // Disabled - some subscriptions don't support Manual redundancy
     siteConfig: {
       linuxFxVersion: 'NODE|20-lts' // Next.js 16 requires Node 20
       alwaysOn: environment == 'prod' ? true : false
