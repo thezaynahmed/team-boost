@@ -14,9 +14,10 @@ fi
 echo "Checking if 'entra-client-secret' exists in Key Vault: $AZURE_KEY_VAULT_NAME..."
 
 # Check if secret exists
-SECRET_EXISTS=$(az keyvault secret list --vault-name "$AZURE_KEY_VAULT_NAME" --query "[?name=='entra-client-secret'] | length(@)" -o tsv)
+# FORCE REGNERATION to fix potential bad secret state
+# SECRET_EXISTS=$(az keyvault secret list --vault-name "$AZURE_KEY_VAULT_NAME" --query "[?name=='entra-client-secret'] | length(@)" -o tsv)
 
-if [ "$SECRET_EXISTS" == "1" ]; then
+if [ "true" == "false" ]; then
     echo "Secret 'entra-client-secret' already exists in Key Vault. Skipping generation."
 else
     echo "Secret not found. Generating new Client Secret for App: $TEAMBOOST_CLIENT_ID..."
