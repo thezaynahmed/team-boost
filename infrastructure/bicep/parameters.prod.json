@@ -20,12 +20,12 @@
     "appServicePlanSku": {
       "value": {
         "dev": {
-          "name": "S1",
-          "tier": "Standard"
+          "name": "F1",
+          "tier": "Free"
         },
         "prod": {
-          "name": "S1",
-          "tier": "Standard"
+          "name": "F1",
+          "tier": "Free"
         }
       }
     },
