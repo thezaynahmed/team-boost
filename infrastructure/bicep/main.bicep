@@ -25,12 +25,12 @@ param clientId string
 @description('App Service Plan SKU configuration')
 param appServicePlanSku object = {
   dev: {
-    name: 'B1'
-    tier: 'Basic'
+    name: 'F1'
+    tier: 'Free'
   }
   prod: {
-    name: 'B1'
-    tier: 'Basic'
+    name: 'F1'
+    tier: 'Free'
   }
 }
 
@@ -297,7 +297,7 @@ resource webApp 'Microsoft.Web/sites@2023-12-01' = {
     redundancyMode: 'None' // Disabled - some subscriptions don't support Manual redundancy
     siteConfig: {
       linuxFxVersion: 'NODE|20-lts' // Next.js 16 requires Node 20
-      alwaysOn: environment == 'prod' ? true : false
+      alwaysOn: false // Free tier (F1) doesn't support alwaysOn
       ftpsState: 'Disabled'
       minTlsVersion: '1.2'
       http20Enabled: true
