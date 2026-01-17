@@ -331,6 +331,15 @@ resource webApp 'Microsoft.Web/sites@2023-12-01' = {
           name: 'NEXT_TELEMETRY_DISABLED'
           value: '1'
         }
+        // Memory optimization for F1 Free tier
+        {
+          name: 'NODE_OPTIONS'
+          value: '--max-old-space-size=512'
+        }
+        {
+          name: 'WEBSITE_RUN_FROM_PACKAGE'
+          value: '1'
+        }
         // NextAuth.js configuration
         {
           name: 'AUTH_TRUST_HOST'
