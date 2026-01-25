@@ -6,24 +6,88 @@ This directory contains Azure Infrastructure as Code (IaC) using Bicep templates
 
 Team-Boost uses Azure services optimized for collaborative applications with real-time features and Microsoft Entra ID integration:
 
-- **App Service**: Linux-based hosting for Next.js 16 with App Router
-- **Cosmos DB**: NoSQL database for teams, sticky notes, and user data
-- **Application Insights**: Performance monitoring and telemetry
-- **Key Vault**: Secure storage for secrets and authentication keys
-- **Log Analytics**: Centralized logging and monitoring
+| Service | Purpose |
+|---------|---------|
+| **App Service** | Linux-based hosting for Next.js with Node.js 20 LTS |
+| **Cosmos DB** | NoSQL database for teams, sticky notes, and user sessions |
+| **Application Insights** | Performance monitoring and telemetry |
+| **Key Vault** | Secure storage for secrets (Entra client secret, Cosmos DB keys) |
+| **Log Analytics** | Centralized logging and monitoring workspace |
 
 ## 📁 Directory Structure
 
 ```
 infrastructure/
-├── bicep/                    # Bicep templates and parameters
-│   ├── main.bicep           # Main infrastructure template
-│   ├── parameters.dev.json  # Development environment config
-│   └── parameters.prod.json # Production environment config
-└── scripts/                 # Deployment scripts
-    ├── deploy-infrastructure.sh  # Infrastructure deployment
-    └── deploy-app.sh            # Application deployment
+├── README.md                         # This file
+├── bicep/                            # Bicep templates and parameters
+│   ├── main.bicep                    # Main infrastructure template (519 lines)
+│   ├── parameters.dev.json           # Development environment parameters
+│   └── parameters.prod.json          # Production environment parameters
+└── scripts/                          # Deployment and utility scripts
+    ├── deploy-infrastructure.sh      # Infrastructure deployment script
+    ├── deploy-app.sh                 # Application deployment script
+    └── manage-auth-secrets.sh        # Entra ID client secret management
 ```
+
+### File Details
+
+#### `bicep/main.bicep`
+The main Bicep template (15.8 KB, 519 lines) that provisions all Azure resources:
+
+| Resource | Type | Description |
+|----------|------|-------------|
+| `logAnalyticsWorkspace` | Log Analytics | Centralized logging (30-90 day retention) |
+| `applicationInsights` | App Insights | Connected to Log Analytics workspace |
+| `keyVault` | Key Vault | RBAC-enabled, stores secrets |
+| `appServicePlan` | App Service Plan | Linux-based, shared across environments |
+| `cosmosDbAccount` | Cosmos DB | Session consistency, continuous backup |
+| `cosmosDatabase` | SQL Database | Named `teamboost` |
+| `cosmosTeamsContainer` | Container | Teams data, partitioned by `/teamId` |
+| `cosmosStickyNotesContainer` | Container | Sticky notes with composite indexes |
+| `cosmosUsersContainer` | Container | User sessions (7-day TTL) |
+| `webApp` | Web App | Next.js app with WebSockets enabled |
+| `webAppLogs` | Logging Config | HTTP logs, error details by environment |
+| `cosmosDbKeySecret` | Key Vault Secret | Cosmos DB primary key storage |
+| `customDomainBinding` | Host Binding | Optional custom domain support |
+
+#### `bicep/parameters.dev.json` & `parameters.prod.json`
+Environment-specific parameter files with:
+
+| Parameter | Dev Value | Prod Value |
+|-----------|-----------|------------|
+| `environment` | `dev` | `prod` |
+| `baseName` | `teamboost` | `teamboost` |
+| `location` | `East US` | `East US` |
+| `appServicePlanSku` | F1 (Free) | F1 (Free) |
+| `cosmosDbThroughput` | 400 RU/s | 2000 RU/s |
+| `tenantId` | *Your value* | *Your value* |
+| `clientId` | *Your value* | *Your value* |
+
+#### `scripts/deploy-infrastructure.sh`
+Bash script (267 lines) with functions for:
+- `validate_environment` - Checks dev/prod parameter
+- `validate_azure_cli` - Ensures Azure CLI is installed
+- `check_azure_login` - Verifies Azure session
+- `set_subscription` - Sets active subscription
+- `check_parameters` - Validates parameter files
+- `create_resource_group` - Creates resource group if needed
+- `validate_bicep` - Validates Bicep syntax
+- `deploy_infrastructure` - Deploys the Bicep template
+
+#### `scripts/deploy-app.sh`
+Bash script (276 lines) with functions for:
+- `validate_inputs` - Validates required arguments
+- `check_prerequisites` - Checks Node.js 20+, npm, Azure CLI
+- `install_dependencies` - Runs `npm ci`
+- `build_application` - Builds Next.js with standalone output
+- `deploy_to_azure` - Zips and deploys to App Service
+- `cleanup` - Removes temporary build files
+
+#### `scripts/manage-auth-secrets.sh`
+Bash script (45 lines) that:
+- Checks if `entra-client-secret` exists in Key Vault
+- Generates new Entra ID client secret if missing
+- Stores the secret in Key Vault automatically
 
 ## 🚀 Quick Start
 
@@ -36,20 +100,29 @@ infrastructure/
 
 ### 1. Configure Parameters
 
-Update the parameter files with your values:
+Update the parameter files with your Entra ID values:
 
-**`bicep/parameters.dev.json` and `bicep/parameters.prod.json`:**
+```bash
+# Edit parameters for your environment
+code infrastructure/bicep/parameters.dev.json
+code infrastructure/bicep/parameters.prod.json
+```
+
+Update these values in both files:
 
 ```json
 {
-  "tenantId": { "value": "your-tenant-id" },
-  "clientId": { "value": "your-app-registration-client-id" }
+  "tenantId": { "value": "your-azure-tenant-id" },
+  "clientId": { "value": "your-entra-app-registration-client-id" }
 }
 ```
 
 ### 2. Deploy Infrastructure
 
 ```bash
+# Make scripts executable
+chmod +x infrastructure/scripts/*.sh
+
 # Deploy development environment
 ./infrastructure/scripts/deploy-infrastructure.sh dev
 
@@ -62,7 +135,12 @@ Update the parameter files with your values:
 After deployment, add your Microsoft Entra ID client secret to Key Vault:
 
 ```bash
-# Get Key Vault name from deployment output
+# Option 1: Use the automated script (generates new secret)
+AZURE_KEY_VAULT_NAME=teamboost-kv-dev \
+TEAMBOOST_CLIENT_ID=your-client-id \
+./infrastructure/scripts/manage-auth-secrets.sh
+
+# Option 2: Manually set existing secret
 az keyvault secret set \
   --vault-name teamboost-kv-dev \
   --name entra-client-secret \
@@ -76,87 +154,74 @@ az keyvault secret set \
 ./infrastructure/scripts/deploy-app.sh dev teamboost-rg-dev teamboost-app-dev
 ```
 
-### 5. Configure Microsoft Entra ID
+### 5. Configure Microsoft Entra ID Redirect URIs
 
 Update your app registration with the deployed URLs:
 
-- **Redirect URI**: `https://teamboost-app-dev.azurewebsites.net/api/auth/callback/microsoft-entra-id`
-- **Logout URL**: `https://teamboost-app-dev.azurewebsites.net`
+| Setting | Development | Production |
+|---------|-------------|------------|
+| **Redirect URI** | `https://teamboost-app-dev.azurewebsites.net/api/auth/callback/microsoft-entra-id` | `https://teamboost-app-prod.azurewebsites.net/api/auth/callback/microsoft-entra-id` |
+| **Logout URL** | `https://teamboost-app-dev.azurewebsites.net` | `https://teamboost-app-prod.azurewebsites.net` |
 
 ## 🏗️ Architecture
 
-Team-Boost uses a **shared resource group architecture** to maximize resource efficiency:
+### Resource Naming Convention
+
+All resources follow the pattern: `{baseName}-{component}-{environment}`
 
 ```
-teamboost-rg (Shared Resource Group)
-├── teamboost-plan (S1 Standard - Shared App Service Plan)
-├── teamboost-app-dev (Development Web App)
-├── teamboost-app-prod (Production Web App)
-├── teamboost-cosmos-dev (Dev Cosmos DB)
-├── teamboost-cosmos-prod (Prod Cosmos DB)
-├── teamboost-kv-dev (Dev Key Vault)
-├── teamboost-kv-prod (Prod Key Vault)
-└── teamboost-insights-* (Application Insights)
+teamboost-rg-dev          # Resource Group
+teamboost-plan            # App Service Plan (shared)
+teamboost-app-dev         # Web App
+teamboost-cosmos-dev      # Cosmos DB Account
+teamboost-kv-dev          # Key Vault
+teamboost-insights-dev    # Application Insights
+teamboost-logs-dev        # Log Analytics Workspace
 ```
 
-**Benefits:**
-- Single App Service Plan = 1 quota slot used
-- Both environments share compute resources
-- Cost-effective for startups/MVPs
-- Easy to manage
+### Environment Comparison
 
-## 🔧 Environment Configuration
+| Feature | Development | Production |
+|---------|-------------|------------|
+| App Service Plan | F1 (Free) | F1 (Free)* |
+| Cosmos DB Throughput | 400 RU/s | 2000 RU/s |
+| Log Retention | 30 days | 90 days |
+| Soft Delete | 7 days | 90 days |
+| Detailed Errors | Enabled | Disabled |
+| Sampling | 100% | 20% |
+| Automatic Failover | Disabled | Enabled |
+| Backup Policy | Continuous 7 Days | Continuous 30 Days |
 
-### Shared App Service Plan
-
-- **SKU**: S1 (Standard)
-- **Tier**: Standard
-- **Features**: Always On, Custom Domains, SSL, Staging Slots
-- **Hosts**: Both Dev and Prod apps
-
-### Development Environment
-
-- **Web App**: `teamboost-app-dev`
-- **Cosmos DB**: 400 RU/s
-- **Key Vault**: `teamboost-kv-dev`
-- **Features**: Debug logging, detailed errors
-
-### Production Environment
-
-- **Web App**: `teamboost-app-prod`
-- **Cosmos DB**: 2000 RU/s
-- **Key Vault**: `teamboost-kv-prod`
-- **Features**: Production optimizations
+*Upgrade to S1/P1V3 for production workloads
 
 ## 📊 Cosmos DB Schema
 
-The infrastructure creates containers optimized for Team-Boost:
+### Database: `teamboost`
 
-### Teams Container
+| Container | Partition Key | TTL | Purpose |
+|-----------|---------------|-----|---------|
+| `team-items` | `/teamId` | None | Team data and metadata |
+| `stickynotes` | `/teamId` | None | Sticky notes with timestamps |
+| `users` | `/userId` | 7 days | User sessions and auth data |
+
+### Indexing Strategy
+
+**team-items & stickynotes containers:**
 ```json
 {
-  "partitionKey": "/teamId",
-  "indexing": "consistent",
-  "ttl": -1
+  "indexingMode": "consistent",
+  "includedPaths": [{ "path": "/*" }],
+  "excludedPaths": [{ "path": "/\"_etag\"/?" }]
 }
 ```
 
-### Sticky Notes Container
+**stickynotes container additional indexes:**
 ```json
 {
-  "partitionKey": "/teamId",
-  "compositeIndexes": [
-    ["/teamId", "/createdAt"]
-  ],
-  "ttl": -1
-}
-```
-
-### Users Container
-```json
-{
-  "partitionKey": "/userId",
-  "ttl": 604800
+  "compositeIndexes": [[
+    { "path": "/teamId", "order": "ascending" },
+    { "path": "/createdAt", "order": "descending" }
+  ]]
 }
 ```
 
@@ -164,184 +229,274 @@ The infrastructure creates containers optimized for Team-Boost:
 
 ### Key Vault Secrets
 
-- `cosmos-primary-key`: Cosmos DB access key
-- `entra-client-secret`: Microsoft Entra ID client secret
+| Secret Name | Description | Auto-populated |
+|-------------|-------------|----------------|
+| `cosmos-primary-key` | Cosmos DB primary access key | ✅ Yes (via Bicep) |
+| `entra-client-secret` | Microsoft Entra ID client secret | ❌ Manual or script |
 
-### App Service Settings
+### Web App Environment Variables
 
-Environment variables are automatically configured:
+The Bicep template configures these app settings automatically:
 
-- `NEXTAUTH_URL`: Authentication callback URL
-- `NEXTAUTH_SECRET`: Session encryption key
-- `AUTH_MICROSOFT_ENTRA_ID_*`: Microsoft authentication settings
-- `COSMOS_DB_*`: Database connection settings
-- `APPLICATIONINSIGHTS_CONNECTION_STRING`: Telemetry settings
+| Variable | Source |
+|----------|--------|
+| `NEXTAUTH_URL` | Computed from app name |
+| `NEXTAUTH_SECRET` | Generated GUID |
+| `AUTH_SECRET` | Same as NEXTAUTH_SECRET |
+| `AUTH_MICROSOFT_ENTRA_ID_ID` | From parameters |
+| `AUTH_MICROSOFT_ENTRA_ID_SECRET` | Key Vault reference |
+| `AUTH_MICROSOFT_ENTRA_ID_TENANT_ID` | From parameters |
+| `COSMOS_DB_ENDPOINT` | Cosmos DB resource |
+| `COSMOS_DB_KEY` | Key Vault reference |
+| `COSMOS_DB_DATABASE_NAME` | `teamboost` |
+| `APPLICATIONINSIGHTS_CONNECTION_STRING` | App Insights resource |
+
+### Managed Identity
+
+Web Apps use System Assigned Managed Identity with Key Vault access policies for secrets.
 
 ## 🚨 GitHub Actions CI/CD
 
-### Automatic Deployment
+### Automatic Deployment Triggers
 
-- **`dev` branch push** → Development environment
-- **`main` branch push** → Production environment
-- **Pull requests** → Infrastructure validation only
+| Trigger | Environment |
+|---------|-------------|
+| Push to `dev` branch | Development |
+| Push to `main` branch | Production |
+| Pull Request | Validation only |
 
-### Required Secrets
+### Required Repository Secrets
 
-Configure these in your GitHub repository settings:
-
-| Secret Name | Description |
-|-------------|-------------|
+| Secret | Description |
+|--------|-------------|
 | `AZURE_CLIENT_ID` | Azure Service Principal Client ID |
 | `AZURE_TENANT_ID` | Azure AD Tenant ID |
 | `AZURE_SUBSCRIPTION_ID` | Azure Subscription ID |
-| `TEAMBOOST_CLIENT_ID` | Microsoft Entra ID App Client ID |
-| `TEAMBOOST_CLIENT_SECRET` | Microsoft Entra ID App Client Secret |
+| `TEAMBOOST_CLIENT_ID` | Entra ID App Client ID |
+| `TEAMBOOST_CLIENT_SECRET` | Entra ID App Client Secret |
 
-### Manual Deployment
+### Manual Workflow Dispatch
 
-Use the GitHub Actions workflow dispatch for manual deployments:
-
-1. Go to Actions tab in your repository
-2. Select "Deploy Team-Boost Infrastructure and Application"
-3. Click "Run workflow"
-4. Choose environment (dev/prod)
+1. Go to **Actions** tab in GitHub
+2. Select **Deploy Team-Boost Infrastructure and Application**
+3. Click **Run workflow**
+4. Choose environment (`dev` or `prod`)
 
 ## 🛠️ Customization
 
-### Adding New Environments
+### Adding a Staging Environment
 
-1. Create new parameter file: `parameters.staging.json`
-2. Update allowed values in `main.bicep`
-3. Add environment to GitHub Actions workflow
-4. Update deployment scripts
-
-### Custom Domains
-
-Update `parameters.prod.json`:
-
+1. Create `parameters.staging.json`:
 ```json
 {
-  "customDomain": {
-    "value": "teamboost.yourcompany.com"
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environment": { "value": "staging" },
+    "baseName": { "value": "teamboost" },
+    ...
   }
 }
 ```
 
-### Scaling Options
+2. Update `main.bicep` allowed values:
+```bicep
+@allowed(['dev', 'staging', 'prod'])
+param environment string
+```
 
-Modify `appServicePlanSku` in parameter files:
+### Custom Domain Configuration
+
+Update your parameter file:
 
 ```json
 {
-  "prod": {
-    "name": "P2V3",
-    "tier": "PremiumV3"
+  "customDomain": { "value": "teamboost.yourcompany.com" }
+}
+```
+
+The Bicep template will automatically:
+- Create hostname binding
+- Update `NEXTAUTH_URL` and `NEXT_PUBLIC_DOMAIN`
+
+### Scaling for Production
+
+Upgrade App Service Plan in `parameters.prod.json`:
+
+```json
+{
+  "appServicePlanSku": {
+    "value": {
+      "prod": {
+        "name": "P1V3",
+        "tier": "PremiumV3"
+      }
+    }
+  }
+}
+```
+
+Increase Cosmos DB throughput:
+
+```json
+{
+  "cosmosDbThroughput": {
+    "value": {
+      "prod": 10000
+    }
   }
 }
 ```
 
 ## 📈 Monitoring and Observability
 
-### Application Insights Features
+### Application Insights Dashboards
 
-- **Real-time metrics**: Track active users and collaboration
-- **Custom events**: Team creation, note additions, user interactions
-- **Performance monitoring**: Page load times, API response times
-- **Error tracking**: Exceptions and failed requests
+Access metrics at: `Azure Portal > Application Insights > teamboost-insights-{env}`
 
-### Log Analytics Queries
+**Key Metrics:**
+- Active users and sessions
+- Request performance (P50, P95, P99)
+- Dependency calls (Cosmos DB, external APIs)
+- Failed requests and exceptions
 
-Useful KQL queries for Team-Boost monitoring:
+### Useful Log Analytics Queries
 
 ```kusto
-// Active collaboration sessions
+// Real-time collaboration sessions
 traces
 | where message contains "team_collaboration"
-| summarize count() by bin(timestamp, 1h)
+| summarize SessionCount = count() by bin(timestamp, 1h)
+| render timechart
 
 // Most active teams
 customEvents
 | where name == "team_activity"
-| summarize count() by tostring(customDimensions.teamId)
-| top 10 by count_
+| summarize Activities = count() by tostring(customDimensions.teamId)
+| top 10 by Activities
+| render columnchart
 
-// Authentication errors
+// Authentication issues
 traces
 | where severityLevel >= 2
-| where message contains "auth"
+| where message contains "auth" or message contains "Entra"
 | project timestamp, message, severityLevel
+
+// Cosmos DB performance
+dependencies
+| where type == "Azure DocumentDB"
+| summarize avg(duration), percentile(duration, 95) by bin(timestamp, 5m)
+| render timechart
 ```
 
 ## 🐛 Troubleshooting
 
 ### Common Issues
 
-1. **Parameter validation errors**
-   - Check tenant ID and client ID values
-   - Ensure Microsoft Entra ID app is properly configured
-
-2. **Authentication failures**
-   - Verify redirect URIs match deployed URLs
-   - Check client secret in Key Vault
-
-3. **Cosmos DB connection issues**
-   - Verify firewall settings
-   - Check access keys in Key Vault
-
-4. **Quota exceeded errors (SubscriptionIsOverQuotaForSku)**
-   - Your subscription has limited App Service Plan slots per tier
-   - Solution: Use a shared App Service Plan (already configured)
-   - If you deleted resource groups, wait 5-10 minutes for quota to refresh
-
-5. **"Resource state is not Online" errors**
-   - After deleting resources, Azure needs 5-10 minutes to fully release names
-   - Wait and re-run the deployment
-   - For Cosmos DB: names are globally unique and reserved during deletion
-
-4. **Deployment failures**
-   - Ensure resource names are globally unique
-   - Check Azure subscription limits
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| Parameter validation errors | Invalid tenant/client ID | Verify values in Azure Portal > Entra ID |
+| Authentication failures | Redirect URI mismatch | Update app registration URIs |
+| Key Vault access denied | RBAC propagation delay | Wait 5-10 minutes after deployment |
+| Cosmos DB connection issues | Firewall or key issues | Check Key Vault secret, verify public access |
+| `SubscriptionIsOverQuotaForSku` | Too many App Service Plans | Delete unused plans or use shared plan |
+| "Resource state is not Online" | Recent deletion | Wait 5-10 minutes, re-deploy |
 
 ### Validation Commands
 
 ```bash
-# Validate Bicep template
-cd infrastructure/bicep
-az deployment group validate \
+# Validate Bicep template syntax
+az bicep build --file infrastructure/bicep/main.bicep
+
+# Validate deployment (what-if)
+az deployment group what-if \
   --resource-group teamboost-rg-dev \
-  --template-file main.bicep \
-  --parameters @parameters.dev.json
+  --template-file infrastructure/bicep/main.bicep \
+  --parameters @infrastructure/bicep/parameters.dev.json
 
 # Check deployment status
 az deployment group list \
   --resource-group teamboost-rg-dev \
-  --query "[0].properties.provisioningState"
+  --query "[0].{Name:name, State:properties.provisioningState}" \
+  --output table
 
 # Test application health
-curl https://teamboost-app-dev.azurewebsites.net/api/health
+curl -s https://teamboost-app-dev.azurewebsites.net/api/health | jq
+
+# View Web App logs
+az webapp log tail --name teamboost-app-dev --resource-group teamboost-rg-dev
+```
+
+### Debugging Key Vault Access
+
+```bash
+# Check Web App Managed Identity
+az webapp identity show \
+  --name teamboost-app-dev \
+  --resource-group teamboost-rg-dev
+
+# List Key Vault access policies
+az keyvault show \
+  --name teamboost-kv-dev \
+  --query "properties.accessPolicies"
+
+# Test secret retrieval
+az keyvault secret show \
+  --vault-name teamboost-kv-dev \
+  --name entra-client-secret
 ```
 
 ## 🔄 Maintenance
 
 ### Regular Tasks
 
-1. **Monthly**: Review Application Insights for performance trends
-2. **Quarterly**: Evaluate Cosmos DB usage and scaling needs
-3. **Bi-annually**: Update Node.js runtime version
-4. **As needed**: Rotate authentication secrets
+| Frequency | Task |
+|-----------|------|
+| Weekly | Review Application Insights for errors |
+| Monthly | Check Cosmos DB RU consumption |
+| Quarterly | Update Node.js runtime version |
+| Bi-annually | Rotate Entra ID client secret |
+| As needed | Review and purge old Log Analytics data |
+
+### Secret Rotation
+
+```bash
+# Generate new client secret
+./infrastructure/scripts/manage-auth-secrets.sh
+
+# Or manually rotate
+az ad app credential reset \
+  --id YOUR_CLIENT_ID \
+  --append \
+  --display-name "Rotated-$(date +%Y%m%d)" \
+  --years 2
+
+# Update Key Vault
+az keyvault secret set \
+  --vault-name teamboost-kv-dev \
+  --name entra-client-secret \
+  --value "NEW_SECRET_VALUE"
+```
 
 ### Backup and Recovery
 
-- **Cosmos DB**: Automatic continuous backup (7-30 days retention)
-- **Application Code**: Stored in Git repository
-- **Configuration**: Infrastructure as Code in this repository
-
-For disaster recovery procedures, see the [Team-Boost Operations Guide](../docs/operations.md).
+| Resource | Backup Method | Retention |
+|----------|---------------|-----------|
+| Cosmos DB | Continuous backup | 7-30 days (by env) |
+| App Configuration | Git repository | Unlimited |
+| Key Vault Secrets | Soft delete + purge protection | 7-90 days (by env) |
 
 ## 📚 Additional Resources
 
 - [Azure App Service Documentation](https://docs.microsoft.com/en-us/azure/app-service/)
 - [Azure Cosmos DB Documentation](https://docs.microsoft.com/en-us/azure/cosmos-db/)
-- [Microsoft Entra ID Authentication](https://docs.microsoft.com/en-us/azure/active-directory/)
-- [Next.js Deployment Guide](https://nextjs.org/docs/deployment)
+- [Microsoft Entra ID for Developers](https://docs.microsoft.com/en-us/azure/active-directory/develop/)
+- [Azure Bicep Documentation](https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/)
+- [NextAuth.js Azure AD Provider](https://next-auth.js.org/providers/azure-ad)
 - [Team-Boost Application Documentation](../README.md)
+
+---
+
+**Last Updated:** January 2026  
+**Bicep Template Version:** 1.0.0  
+**Supported Environments:** dev, prod
